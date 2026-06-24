@@ -33,6 +33,7 @@ const App = () => {
   return (
     <div>
       <p>{anecdotes[selected]}</p>
+      <p>Has {votes[selected]} votes!</p>
       <Button onClick={handleVote} text={"Vote"}/>
       <Button onClick={handleNext} text={"Next anecdote"}/>
     </div>
