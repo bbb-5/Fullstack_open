@@ -3,6 +3,7 @@ import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 import personService from './services/persons'
+import Notification from './components/Notification'
 
 const App = () => {
 
@@ -11,6 +12,8 @@ const App = () => {
   const [newFilter, setFilter] = useState('')
   const [showAll, setShowAll] = useState(true)
   const [persons, setPersons] = useState([])
+  const [notification, setNotification] = useState(null)
+  const [notificationStatus, setStatus] = useState('notification-success')
 
   useEffect(() => {
     personService
@@ -36,12 +39,16 @@ const App = () => {
         .then(()=> personService.getAll())
         .then((updatedPersons) => {
           setPersons(updatedPersons)
+          showNotification(`${foundPerson.name}'s number changed to ${newNumber}`)
+          setStatus('notification-success')
+        }).catch(error => {
+          showNotification(`Could not change ${foundPerson.name}'s number: ${error.response.data.error}`)
+          setStatus('notification-error')
         })
+        setNewName('')
+        setNewNumber('')
+        return
       }
-
-      setNewName('')
-      setNewNumber('')
-      return
 
     } else {
       const new_person = {
@@ -52,11 +59,17 @@ const App = () => {
       personService
         .create(new_person)
         .then((returnedPerson) => {
+          showNotification(`Added ${newName}`)
+          setStatus('notification-success')
           setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
         })
-
+        .catch(error => {
+          console.log('Error:', error.response.data)
+          showNotification(`Could not add ${newName}: ${error.response.data.error}`)
+          setStatus('notification-error')
+        })
       }
   }
 
@@ -67,7 +80,14 @@ const App = () => {
         .remove(personToRemove.id)
         .then(()=> personService.getAll())
         .then((updatedPersons) => setPersons(updatedPersons))
-    }
+        showNotification(`Deleted ${personToRemove.name}`)
+        setStatus('notification-success')
+        .catch(error => {
+          console.log('Error:', error.response.data)
+          showNotification(`Could not remove ${personToRemove.name}: ${error.response.data.error}`)
+          setStatus('notification-red')
+        })
+    }       
   }
 
 
@@ -75,6 +95,13 @@ const App = () => {
   ? persons
   : persons.filter(person => 
     person.name.toUpperCase().includes(newFilter.toUpperCase()))
+
+  const showNotification = (message) => {
+    setNotification(message)
+    setTimeout(() => {
+      setNotification(null)
+    }, 3000)
+  }
 
   const handleNameChange = (event) => {
     setNewName(event.target.value)
@@ -98,6 +125,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notification} status={notificationStatus}/>
       <Filter filter={newFilter} handleFilter={handleFilterChange}/>
       <h2>Add a new contact</h2>
       <PersonForm 
