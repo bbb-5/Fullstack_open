@@ -2,11 +2,15 @@ import { useState, useEffect } from 'react'
 import Filter from './components/Filter'
 import axios from 'axios'
 import Countries from './components/Countries'
+import Instruction from './components/Instruction.'
+import Country from './components/Country'
 
 const App = () => {
   const [newFilter, setFilter] = useState('')
   const [shownCountries, setShownCountries] = useState([])
   const [allCountries, setAllCountries] = useState([])
+  const [selected, setSelected] = useState(null)
+  const [instStatus,setStatus] = useState(false)
 
   useEffect(() => {
     axios
@@ -24,17 +28,35 @@ const App = () => {
     
     const new_filter = event.target.value
     setFilter(new_filter)
+    setSelected(null)
 
     const filtered = (allCountries.filter(country =>
       country.name.common.toUpperCase().includes(new_filter.toUpperCase())
     ))
     setShownCountries(filtered)
+
+    if (filtered.length === 1){
+      setSelected(filtered[0])
+    }
+    
+    if (filtered.length >10){
+      setStatus(true)
+    } else {
+      setStatus(false)
+    }
+
+  }
+
+  const handleSelectCountry = (country) => {
+    setSelected(country)
   }
 
   return (
     <div>
       <Filter filter={newFilter} handleFilter={handleFilterChange}/>
-      <Countries countries={shownCountries}/>
+      <Instruction status={instStatus}/>
+      <Countries countries={shownCountries} handleSelected={handleSelectCountry}/>
+      <Country country={selected}/>
     </div>
   )
 }
