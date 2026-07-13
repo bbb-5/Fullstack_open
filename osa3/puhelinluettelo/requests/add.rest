@@ -1,4 +1,6 @@
-POST  http://localhost:3001/api/persons
+//POST  http://localhost:3001/api/persons
+
+POST https://puhelinluettelo-s9oo.onrender.com/api/persons
 Content-Type: application/json
 
 {

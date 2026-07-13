@@ -11,4 +11,4 @@ return (
     </div>)
 }
 
-export default Persons
+export default Persons  
