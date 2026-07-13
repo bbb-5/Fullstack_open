@@ -79,13 +79,15 @@ const App = () => {
       personService
         .remove(personToRemove.id)
         .then(()=> personService.getAll())
-        .then((updatedPersons) => setPersons(updatedPersons))
-        showNotification(`Deleted ${personToRemove.name}`)
-        setStatus('notification-success')
+        .then((updatedPersons) => {
+          setPersons(updatedPersons)
+          showNotification(`Deleted ${personToRemove.name}`)
+          setStatus('notification-success')
+        })
         .catch(error => {
           console.log('Error:', error.response.data)
           showNotification(`Could not remove ${personToRemove.name}: ${error.response.data.error}`)
-          setStatus('notification-red')
+          setStatus('notification-error')
         })
     }       
   }

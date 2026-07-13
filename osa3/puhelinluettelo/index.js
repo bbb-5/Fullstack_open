@@ -1,7 +1,9 @@
 const http = require('http')
 const express = require('express')
-const app = express()
 const morgan = require('morgan')
+const cors = require('cors')
+const app = express()
+app.use(cors())
 app.use(express.json())
 //app.use(morgan('tiny'))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
@@ -93,19 +95,20 @@ app.post('/api/persons', (request, response) => {
   const  person = {
     name: body.name,
     number: body.number || '',
-    id: generateId(),
+    id: generateId()
   }
 
-  morgan.token('body', request => JSON.stringify(request.body))
+  
   persons = persons.concat(person)
-
+  
   response.json(person)
 })
 
+morgan.token('body', (req, res) => JSON.stringify(req.body))
 const PORT = 3001
 app.listen(PORT)
 console.log(`Server running on port ${PORT}`)
 
 app.listen(PORT,()=>{
-  console.log('Listening on port 3001...')
+  console.log(`Listening on port ${PORT}...`)
   })
