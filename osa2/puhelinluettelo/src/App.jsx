@@ -14,6 +14,7 @@ const App = () => {
   const [persons, setPersons] = useState([])
   const [notification, setNotification] = useState(null)
   const [notificationStatus, setStatus] = useState('notification-success')
+  //const min_letter_count = 3
 
   useEffect(() => {
     personService
@@ -27,7 +28,13 @@ const App = () => {
 
     event.preventDefault()
 
+    /*
     if (newName === '') return
+    if (newName.length < min_letter_count) {
+      showNotification(`Name "${newName}" is too short, min 3 letters!`)
+      setStatus('notification-error')
+      return
+    }*/
 
     const foundPerson = persons.find(p => p.name === newName)
 
