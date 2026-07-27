@@ -31,11 +31,17 @@ app.get('/api/persons', (request, response) => {
   })
 })
 
-app.get('/info', (request, response) => {
+app.get('/info', (request, response, next) => {
+
   const date = new Date()
-  response.send(`
-    <p>Phonebook has info for ${persons.length} people!</p>
-    <p>${date}</p>`)
+
+  Person.find({})
+    .then(people => {
+      response.send
+      (`<p>Phonebook has info for ${people.length} people!</p>
+        <p>${date}</p>`)
+    })
+    .catch(error => next(error))
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
