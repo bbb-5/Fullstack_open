@@ -21,6 +21,7 @@
   "homepage": "https://github.com/bbb-5/Fullstack_open#readme",
   "description": "",
   "dependencies": {
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "mongoose": "^9.8.0",
     "morgan": "^1.11.0"
