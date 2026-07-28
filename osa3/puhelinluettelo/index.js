@@ -44,8 +44,8 @@ app.get('/info', (request, response, next) => {
 
   Person.find({})
     .then(people => {
-      response.send
-      (`<p>Phonebook has info for ${people.length} people!</p>
+      response.send(
+        `<p>Phonebook has info for ${people.length} people!</p>
         <p>${date}</p>`)
     })
     .catch(error => next(error))
@@ -59,14 +59,15 @@ app.get('/api/persons/:id', (request, response, next) => {
       } else {
         response.status(404).end()
       }
-  })
-  .catch(error => next(error))
+    })
+    .catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndDelete(request.params.id)
     .then(result => {
       response.status(204).end()
+      console.log(result)
     })
     .catch(error => next(error))
 })
@@ -85,7 +86,7 @@ app.post('/api/persons', (request, response,next) => {
   person.save().then(savedPerson => {
     response.json(savedPerson)
   })
-  .catch(error => next(error))
+    .catch(error => next(error))
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
@@ -107,7 +108,7 @@ app.put('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-morgan.token('body', (req, res) => JSON.stringify(req.body))
+morgan.token('body', (req) => JSON.stringify(req.body))
 
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
@@ -115,11 +116,12 @@ const unknownEndpoint = (request, response) => {
 
 app.use(errorHandler)
 app.use(unknownEndpoint)
+app.use(requestLogger)
 
 const PORT = process.env.PORT
 app.listen(PORT)
 console.log(`Server running on port ${PORT}`)
 
-app.listen(PORT,()=>{
+app.listen(PORT,() => {
   console.log(`Listening on port ${PORT}...`)
-  })
+})

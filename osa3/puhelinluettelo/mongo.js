@@ -29,7 +29,6 @@ const Person = mongoose.model('Person', personSchema)
 
 
 if (process.argv.length === 5) {
-  
   const person = new Person({
     name: name,
     number: number
@@ -39,7 +38,6 @@ if (process.argv.length === 5) {
     console.log(`Added ${person.name} ${person.number} to phonebook!`)
     mongoose.connection.close()
   })
-  
 } else {
 
   Person.find({}).then(result => {
