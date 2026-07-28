@@ -3,9 +3,14 @@ const Person = require('./models/person')
 const express = require('express')
 const morgan = require('morgan')
 const app = express()
-app.use(express.static('dist'))
-app.use(express.json())
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
+
+const requestLogger = (request, response, next) => {
+  console.log('Method:', request.method)
+  console.log('Path:  ', request.path)
+  console.log('Body:  ', request.body)
+  console.log('---')
+  next()
+}
 
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
@@ -19,9 +24,9 @@ const errorHandler = (error, request, response, next) => {
   next(error)
 }
 
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
-}
+app.use(express.static('dist'))
+app.use(express.json())
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 app.get('/', (request, response) => {
   response.send('<h1>Tervetuloa puhelinluetteloon!</h1>')
@@ -83,8 +88,6 @@ app.post('/api/persons', (request, response,next) => {
   .catch(error => next(error))
 })
 
-morgan.token('body', (req, res) => JSON.stringify(req.body))
-
 app.put('/api/persons/:id', (request, response, next) => {
   const { name, number } = request.body
 
@@ -103,6 +106,12 @@ app.put('/api/persons/:id', (request, response, next) => {
     })
     .catch(error => next(error))
 })
+
+morgan.token('body', (req, res) => JSON.stringify(req.body))
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
 
 app.use(errorHandler)
 app.use(unknownEndpoint)
