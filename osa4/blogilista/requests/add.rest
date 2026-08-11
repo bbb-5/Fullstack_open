@@ -1,0 +1,9 @@
+POST http://localhost:3003/api/blogs/
+Content-Type: application/json
+
+{
+    "title": "Brawling Blog",
+    "author": "brawler",
+    "url": "braling.brawler.com",
+    "likes": 324
+}
