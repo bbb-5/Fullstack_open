@@ -40,7 +40,7 @@ const blogs = [
     title: 'TDD harms architecture',
     author: 'Robert C. Martin',
     url: 'http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html',
-    likes: 0,
+    likes: 5,
     __v: 0
   },
   {
@@ -56,7 +56,7 @@ const blogs = [
     title: 'Go To Statement Considered Harmful',
     author: 'Edsger W. Dijkstra',
     url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
-    likes: 5,
+    likes: 0,
     __v: 0
   }
 ]
@@ -76,5 +76,30 @@ describe('total likes', () => {
   test('likes of empty bloglist is 0', () => {
     const result = listHelper.totalLikes([])
     assert.strictEqual(result, 0)
+  })
+})
+
+describe('favorite blog', () => {
+
+  test('returns most liked of many', () => {
+    const result = listHelper.favoriteBlog(blogs)
+    assert.deepStrictEqual(result, blogs[2])
+  })
+
+  test('returns 1 blog with 1 blog', () => {
+    const result = listHelper.favoriteBlog([blogs[4]])
+    assert.deepStrictEqual(result, blogs[4])
+  })
+
+  test('empty returns null', () => {
+    const result = listHelper.favoriteBlog([])
+    assert.deepStrictEqual(result, null)
+  })
+
+  test('returns a blog with same amount of likes', () => {
+    const result = listHelper.favoriteBlog(blogs).likes
+    const max = Math.max.apply(null,
+      blogs.map(function (o) { return o.likes }))
+    assert.strictEqual(result, max)
   })
 })
