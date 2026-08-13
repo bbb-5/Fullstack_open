@@ -64,6 +64,38 @@ test('a specific blog is within the returned blogs', async () => {
   assert.strictEqual(contents.includes('Go To Statement Considered Harmful'), true)
 })
 
+test('returned blogs id field is called "id"', async () => {
+  const response = await api.get('/api/blogs')
+
+  const contents = response.body.map(b => 'id' in b)
+  assert.strictEqual(contents.length, initialBlogs.length)
+})
+
+test('a valid blog can be added ', async () => {
+  const newBlog = {
+    _id: '5a422bc61b54a676234d17fc',
+    title: 'Type wars',
+    author: 'Robert C. Martin',
+    url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
+    likes: 2,
+    __v: 0
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const response = await api.get('/api/blogs')
+
+  const titles = response.body.map(r => r.title)
+
+  assert.strictEqual(response.body.length, initialBlogs.length + 1)
+
+  assert(titles.includes('Type wars'))
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
