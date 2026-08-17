@@ -96,6 +96,28 @@ test('a valid blog can be added ', async () => {
   assert(titles.includes('Type wars'))
 })
 
+test('blog with no set likes value will be set to 0', async () => {
+  const newBlog = {
+    _id: '5a422bc61b54a676234d17fc',
+    title: 'Type wars',
+    author: 'Robert C. Martin',
+    url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
+    __v: 0
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const response = await api.get('/api/blogs')
+
+  const likes = response.body.map(r => r.likes)
+
+  assert.strictEqual(likes[likes.length-1],0)
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
