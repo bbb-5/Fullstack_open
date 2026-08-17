@@ -118,6 +118,22 @@ test('blog with no set likes value will be set to 0', async () => {
   assert.strictEqual(likes[likes.length-1],0)
 })
 
+test('invalid post will be responded with 400 ', async () => {
+  const newBlog = {
+    _id: '5a422bc61b54a676234d17fc',
+    author: 'Robert C. Martin',
+    likes: 2,
+    __v: 0
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400)
+    .expect('Content-Type', /application\/json/)
+
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
