@@ -1,5 +1,5 @@
 const assert = require('node:assert')
-const { test, after, beforeEach } = require('node:test')
+const { test, after, beforeEach, describe } = require('node:test')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
@@ -44,31 +44,33 @@ beforeEach(async () => {
   await blogObject.save()
 })
 
-test('blogs are returned as json', async () => {
-  await api
-    .get('/api/blogs')
-    .expect(200)
-    .expect('Content-Type', /application\/json/)
-})
+describe('retrieving initial blogs', () => {
+  test('blogs are returned as json', async () => {
+    await api
+      .get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+  })
 
-test('all blogs are returned', async () => {
-  const response = await api.get('/api/blogs')
+  test('all blogs are returned', async () => {
+    const response = await api.get('/api/blogs')
 
-  assert.strictEqual(response.body.length, initialBlogs.length)
-})
+    assert.strictEqual(response.body.length, initialBlogs.length)
+  })
 
-test('a specific blog is within the returned blogs', async () => {
-  const response = await api.get('/api/blogs')
+  test('a specific blog is within the returned blogs', async () => {
+    const response = await api.get('/api/blogs')
 
-  const contents = response.body.map(e => e.title)
-  assert.strictEqual(contents.includes('Go To Statement Considered Harmful'), true)
-})
+    const contents = response.body.map(e => e.title)
+    assert.strictEqual(contents.includes('Go To Statement Considered Harmful'), true)
+  })
 
-test('returned blogs id field is called "id"', async () => {
-  const response = await api.get('/api/blogs')
+  test('returned blogs id field is called "id"', async () => {
+    const response = await api.get('/api/blogs')
 
-  const contents = response.body.map(b => 'id' in b)
-  assert.strictEqual(contents.length, initialBlogs.length)
+    const contents = response.body.map(b => 'id' in b)
+    assert.strictEqual(contents.length, initialBlogs.length)
+  })
 })
 
 test('a valid blog can be added ', async () => {
@@ -96,42 +98,44 @@ test('a valid blog can be added ', async () => {
   assert(titles.includes('Type wars'))
 })
 
-test('blog with no set likes value will be set to 0', async () => {
-  const newBlog = {
-    _id: '5a422bc61b54a676234d17fc',
-    title: 'Type wars',
-    author: 'Robert C. Martin',
-    url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
-    __v: 0
-  }
+describe('adding new blogs', () => {
+  test('blog with no set likes value will be set to 0', async () => {
+    const newBlog = {
+      _id: '5a422bc61b54a676234d17fc',
+      title: 'Type wars',
+      author: 'Robert C. Martin',
+      url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
+      __v: 0
+    }
 
-  await api
-    .post('/api/blogs')
-    .send(newBlog)
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
 
-  const response = await api.get('/api/blogs')
+    const response = await api.get('/api/blogs')
 
-  const likes = response.body.map(r => r.likes)
+    const likes = response.body.map(r => r.likes)
 
-  assert.strictEqual(likes[likes.length-1],0)
-})
+    assert.strictEqual(likes[likes.length-1],0)
+  })
 
-test('invalid post will be responded with 400 ', async () => {
-  const newBlog = {
-    _id: '5a422bc61b54a676234d17fc',
-    author: 'Robert C. Martin',
-    likes: 2,
-    __v: 0
-  }
+  test('invalid post will be responded with 400 ', async () => {
+    const newBlog = {
+      _id: '5a422bc61b54a676234d17fc',
+      author: 'Robert C. Martin',
+      likes: 2,
+      __v: 0
+    }
 
-  await api
-    .post('/api/blogs')
-    .send(newBlog)
-    .expect(400)
-    .expect('Content-Type', /application\/json/)
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
 
+  })
 })
 
 after(async () => {
