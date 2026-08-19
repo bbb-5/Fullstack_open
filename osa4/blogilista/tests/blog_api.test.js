@@ -3,45 +3,14 @@ const { test, after, beforeEach, describe } = require('node:test')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
+const helper = require('./test_helper')
 const Blog = require('../models/blog')
 
 const api = supertest(app)
 
-const initialBlogs = [
-  {
-    _id: '5a422a851b54a676234d17f7',
-    title: 'React patterns',
-    author: 'Michael Chan',
-    url:'"https://reactpatterns.com/',
-    likes: 7,
-    __v: 0
-  },
-  {
-    _id: '5a422aa71b54a676234d17f8',
-    title: 'Go To Statement Considered Harmful',
-    author: 'Edsger W. Dijkstra',
-    url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
-    likes: 5,
-    __v: 0
-  },
-  {
-    _id: '5a422b3a1b54a676234d17f9',
-    title: 'Canonical string reduction',
-    author: 'Edsger W. Dijkstra',
-    url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
-    likes: 12,
-    __v: 0
-  }
-]
-
 beforeEach(async () => {
   await Blog.deleteMany({})
-  let blogObject = new Blog(initialBlogs[0])
-  await blogObject.save()
-  blogObject = new Blog(initialBlogs[1])
-  await blogObject.save()
-  blogObject = new Blog(initialBlogs[2])
-  await blogObject.save()
+  await Blog.insertMany(helper.initialBlogs)
 })
 
 describe('retrieving initial blogs', () => {
@@ -55,7 +24,7 @@ describe('retrieving initial blogs', () => {
   test('all blogs are returned', async () => {
     const response = await api.get('/api/blogs')
 
-    assert.strictEqual(response.body.length, initialBlogs.length)
+    assert.strictEqual(response.body.length, helper.initialBlogs.length)
   })
 
   test('a specific blog is within the returned blogs', async () => {
@@ -69,7 +38,9 @@ describe('retrieving initial blogs', () => {
     const response = await api.get('/api/blogs')
 
     const contents = response.body.map(b => 'id' in b)
-    assert.strictEqual(contents.length, initialBlogs.length)
+    const _ids = response.body.map(b => '_id' in b)
+    assert.deepStrictEqual(contents, [true,true,true])
+    assert.deepStrictEqual(_ids, [false,false,false])
   })
 })
 
@@ -93,7 +64,7 @@ test('a valid blog can be added ', async () => {
 
   const titles = response.body.map(r => r.title)
 
-  assert.strictEqual(response.body.length, initialBlogs.length + 1)
+  assert.strictEqual(response.body.length, helper.initialBlogs.length + 1)
 
   assert(titles.includes('Type wars'))
 })
@@ -122,7 +93,7 @@ describe('adding new blogs', () => {
     assert.strictEqual(likes[likes.length-1],0)
   })
 
-  test('invalid post will be responded with 400 ', async () => {
+  test('invalid blog will be responded with 400 ', async () => {
     const newBlog = {
       _id: '5a422bc61b54a676234d17fc',
       author: 'Robert C. Martin',
@@ -143,11 +114,11 @@ describe('deleting new blogs', () => {
 
   test('initial blog can be deleted ', async () => {
 
-    await api.delete(`/api/blogs/${initialBlogs[0]._id}`).expect(204)
+    await api.delete(`/api/blogs/${helper.initialBlogs[0]._id}`).expect(204)
 
     const response = await api.get('/api/blogs/')
 
-    assert.strictEqual(response.body.length, initialBlogs.length - 1)
+    assert.strictEqual(response.body.length, helper.initialBlogs.length - 1)
 
     const contents = response.body.map(e => e.title)
     assert.strictEqual(contents.includes('React patterns'), false)
@@ -170,7 +141,7 @@ describe('deleting new blogs', () => {
 
     let response = await api.get('/api/blogs/')
 
-    assert.strictEqual(response.body.length, initialBlogs.length+1)
+    assert.strictEqual(response.body.length, helper.initialBlogs.length+1)
 
     let contents = response.body.map(e => e.title)
     assert.strictEqual(contents.includes('Type wars'), true)
@@ -179,7 +150,7 @@ describe('deleting new blogs', () => {
 
     response = await api.get('/api/blogs/')
 
-    assert.strictEqual(response.body.length, initialBlogs.length)
+    assert.strictEqual(response.body.length, helper.initialBlogs.length)
 
     contents = response.body.map(e => e.title)
     assert.strictEqual(contents.includes('Type wars'), false)
@@ -266,7 +237,7 @@ describe('editing blogs', () => {
 
     let response = await api.get('/api/blogs/')
 
-    assert.strictEqual(response.body.length, initialBlogs.length+1)
+    assert.strictEqual(response.body.length, helper.initialBlogs.length+1)
 
     let contents = response.body.map(e => e.title)
     assert.strictEqual(contents.includes('Type wars'), true)
