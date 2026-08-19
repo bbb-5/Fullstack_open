@@ -201,6 +201,95 @@ describe('deleting new blogs', () => {
 
 })
 
+describe('editing blogs', () => {
+
+  test('updates likes of a initial blog', async () => {
+
+    let response = await api.get('/api/blogs/')
+
+    const likesAtStart = response.body[0].likes
+    const updatedBlog = response.body[0]
+    updatedBlog.likes = updatedBlog.likes +1
+
+    await api
+      .put(`/api/blogs/${response.body[0].id}`)
+      .send(updatedBlog)
+      .expect(200)
+
+    response = await api.get('/api/blogs/')
+
+    assert.strictEqual(likesAtStart+1, response.body[0].likes)
+  })
+
+  test('updating invalid blog will be responded with 400', async () => {
+
+    const updatedBlog = {
+      'title': 'Go To Statement Considered Harmful',
+      'url':	'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
+      'likes': 6
+    }
+
+    await api
+      .put('/api/blogs/0364869386jeskjgs')
+      .send(updatedBlog)
+      .expect(400)
+  })
+
+  test('updating non existent blog will be responded with 404', async () => {
+
+    const updatedBlog = {
+      'title': 'Go To Statement Considered Harmful',
+      'url':	'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
+      'likes': 6
+    }
+
+    await api
+      .put('/api/blogs/5a422b3a1b54a111134d17f9')
+      .send(updatedBlog)
+      .expect(404)
+  })
+
+  test('newly added blog can be edited ', async () => {
+
+    const newBlog = {
+      _id: '5a422bc61b54a676234d17fc',
+      title: 'Type wars',
+      author: 'Robert C. Martin',
+      url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
+      __v: 0
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+
+    let response = await api.get('/api/blogs/')
+
+    assert.strictEqual(response.body.length, initialBlogs.length+1)
+
+    let contents = response.body.map(e => e.title)
+    assert.strictEqual(contents.includes('Type wars'), true)
+
+    const updatedBlog = {
+      'title': 'Crazy Wars',
+      'url':	'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
+      'likes': 6
+    }
+
+    await api
+      .put(`/api/blogs/${response.body[response.body.length-1].id}`)
+      .send(updatedBlog)
+      .expect(200)
+
+    response = await api.get('/api/blogs/')
+
+    contents = response.body.map(e => e.title)
+    assert.strictEqual(contents.includes('Type wars'), false)
+    assert.strictEqual(contents.includes('Crazy Wars'), true)
+  })
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
