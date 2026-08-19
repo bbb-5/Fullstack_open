@@ -99,6 +99,7 @@ test('a valid blog can be added ', async () => {
 })
 
 describe('adding new blogs', () => {
+
   test('blog with no set likes value will be set to 0', async () => {
     const newBlog = {
       _id: '5a422bc61b54a676234d17fc',
@@ -136,6 +137,68 @@ describe('adding new blogs', () => {
       .expect('Content-Type', /application\/json/)
 
   })
+})
+
+describe('deleting new blogs', () => {
+
+  test('initial blog can be deleted ', async () => {
+
+    await api.delete(`/api/blogs/${initialBlogs[0]._id}`).expect(204)
+
+    const response = await api.get('/api/blogs/')
+
+    assert.strictEqual(response.body.length, initialBlogs.length - 1)
+
+    const contents = response.body.map(e => e.title)
+    assert.strictEqual(contents.includes('React patterns'), false)
+  })
+
+  test('newly added blog can be deleted ', async () => {
+
+    const newBlog = {
+      _id: '5a422bc61b54a676234d17fc',
+      title: 'Type wars',
+      author: 'Robert C. Martin',
+      url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
+      __v: 0
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+
+    let response = await api.get('/api/blogs/')
+
+    assert.strictEqual(response.body.length, initialBlogs.length+1)
+
+    let contents = response.body.map(e => e.title)
+    assert.strictEqual(contents.includes('Type wars'), true)
+
+    await api.delete(`/api/blogs/${response.body[response.body.length-1].id}`).expect(204)
+
+    response = await api.get('/api/blogs/')
+
+    assert.strictEqual(response.body.length, initialBlogs.length)
+
+    contents = response.body.map(e => e.title)
+    assert.strictEqual(contents.includes('Type wars'), false)
+  })
+
+  test('deleting a blog with invalid id will be responded with 400 ', async () => {
+
+    await api
+      .delete('/api/blogs/jglgegklsgjkljegjp')
+      .expect(400)
+  })
+
+  test('trying to delete a blog which does not exist will be responded with 400 ', async () => {
+
+    await api
+      .delete('/api/blogs/548534086830680')
+      .expect(400)
+  })
+
 })
 
 after(async () => {
